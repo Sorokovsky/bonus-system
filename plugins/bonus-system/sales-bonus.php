@@ -1,4 +1,5 @@
 <?php
+require_once "./bonus.php";
 class SalesBonus
 {
     private float $min_price;

@@ -1,7 +1,8 @@
 version: '3.9'
+
 services:
   database:
-    image: mysql:latest
+    image: mysql:8.0
     container_name: bonus-system.database
     restart: always
     environment:
@@ -12,38 +13,94 @@ services:
     ports:
       - "3310:3306"
     volumes:
+      - db-data:/var/lib/mysql
       - ./.srv/database:/var/lib/mysql
+    command: 
+      - --innodb-buffer-pool-size=256M
+      - --max_connections=100
+      - --performance-schema=0
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          memory: 256M
+
   wordpress:
     image: wordpress:latest
     container_name: bonus-system.wordpress
     restart: always
     environment:
-      WORDPRESS_DB_HOST: database
+      WORDPRESS_DB_HOST: database:3306
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: wordpress
       WORDPRESS_DB_NAME: bonus-system
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_CACHE', true);
+        define('WP_REDIS_HOST', 'redis');
+        define('WP_REDIS_PORT', 6379);
+        define('WP_MEMORY_LIMIT', '256M');
+        define('WP_MAX_MEMORY_LIMIT', '512M');
+        define('AUTOSAVE_INTERVAL', 300);
+        define('WP_POST_REVISIONS', 5);
+        define('EMPTY_TRASH_DAYS', 7);
+        define('DISABLE_WP_CRON', false);
     ports:
       - "8000:80"
     volumes:
-      - ./.srv/wordpress:/var/www/html
-      - ./themes/:/var/www/html/wp-content/themes
-      - ./plugins/:/var/www/html/wp-content/plugins
-      - ./mu-plugins/:/var/www/html/wp-content/mu-plugins
+      - wp-data:/var/www/html
+      - ./themes/:/var/www/html/wp-content/themes:cached
+      - ./plugins/:/var/www/html/wp-content/plugins:cached
+      - ./mu-plugins/:/var/www/html/wp-content/mu-plugins:cached
       - ./.srv/custom.ini:/usr/local/etc/php/conf.d/custom.ini
     depends_on:
       - database
-    links:
-      - database
+      - redis
+    deploy:
+      resources:
+        limits:
+          cpus: '0.8'
+          memory: 512M
+        reservations:
+          cpus: '0.4'
+          memory: 256M
+
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: bonus-system.phpmyadmin
+    restart: always
     environment:
-      MYSQL_USERNAME: wordpress
-      MYSQL_ROOT_PASSWORD: wordpress
       PMA_HOST: database
+      PMA_USER: wordpress
+      PMA_PASSWORD: wordpress
+      UPLOAD_LIMIT: 64M
     ports:
       - "8181:80"
     depends_on:
       - database
-    links:
-      - database
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: bonus-system.redis
+    restart: always
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    ports:
+      - "127.0.0.1:6379:6379"
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+volumes:
+  wp-data:
+  db-data:
+  redis-data:

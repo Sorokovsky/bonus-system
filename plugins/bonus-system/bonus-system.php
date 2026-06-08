@@ -10,100 +10,82 @@ Author: Sorokovskys
 Text Domain: bonus-system
 */
 
-require_once plugin_dir_path(__FILE__) . "sales-bonus.php";
-require_once plugin_dir_path(__FILE__) . "page-settings.php";
+namespace BonusSystem;
 
-class BonusSystem
+use BonusSystem\Controllers\BonusController;
+use BonusSystem\Controllers\SettingsController;
+use BonusSystem\Models\SettingsModel;
+
+if (!defined("ABSPATH")) {
+    exit;
+}
+
+spl_autoload_register(function ($class) {
+    $prefix = 'BonusSystem\\';
+    $base_dir = __DIR__ . '/';
+    $length = strlen($prefix);
+    if (strncmp($prefix, $class, $length) !== 0) {
+        return;
+    }
+    $relative_class = substr($class, $length);
+    $file = $base_dir . str_replace('\\', '/', $relative_class) . '.php';
+    if (file_exists($file)) {
+        require_once $file;
+    } else {
+        die("BonusSystem: Файл не знайдено - " . $file);
+    }
+});
+
+class BonusSystemPlugin
 {
-    private PageSettings $page_settings;
+    private static ?BonusSystemPlugin $instance = null;
+    private BonusController $bonus_controller;
+    private SettingsController $settings_controller;
 
-    public function __construct()
+    public static function get_instance(): BonusSystemPlugin
     {
-        add_action("woocommerce_cart_loaded_from_session", [$this, 'discount']);
-        $this->page_settings = new PageSettings();
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+        return self::$instance;
     }
 
-    private function get_sales()
+    private function __construct()
     {
-        $tiers = get_option('bonus_system_tiers', []);
-
-        if (empty($tiers)) {
-            return [];
-        }
-
-        $sales = [];
-        foreach ($tiers as $tier) {
-            // Перевіряємо чи є мінімальна сума
-            if (empty($tier['min_amount'])) {
-                continue;
-            }
-
-            // Отримуємо значення знижки в залежності від типу
-            $discount_type = isset($tier['discount_type']) ? $tier['discount_type'] : 'percent';
-            $discount_value = 0;
-
-            if ($discount_type === 'percent') {
-                if (isset($tier['discount_percent']) && !empty($tier['discount_percent'])) {
-                    $discount_value = (float) $tier['discount_percent'];
-                } else {
-                    continue; // Пропускаємо якщо немає значення
-                }
-            } else {
-                if (isset($tier['discount_fixed']) && !empty($tier['discount_fixed'])) {
-                    $discount_value = (float) $tier['discount_fixed'];
-                } else {
-                    continue; // Пропускаємо якщо немає значення
-                }
-            }
-
-            $sales[] = new SalesBonus(
-                (float) $tier['min_amount'],
-                $discount_type,
-                $discount_value
-            );
-        }
-
-        // Сортуємо за мінімальною сумою
-        usort($sales, function ($a, $b) {
-            return $a->get_min_price() <=> $b->get_min_price();
-        });
-
-        return $sales;
+        $this->init_controllers();
+        $this->register_hooks();
     }
 
-    public function discount()
+    private function init_controllers()
     {
-        if (is_null(WC()->cart)) {
-            return;
-        }
+        $this->bonus_controller = new BonusController();
+        $this->settings_controller = new SettingsController();
+    }
 
-        $sales = $this->get_sales();
-        $best_bonus = null;
-        $subtotal = WC()->cart->get_subtotal();
+    private function register_hooks()
+    {
+        add_action('woocommerce_cart_loaded_from_session', [$this->bonus_controller, 'apply_discount']);
+        add_action('admin_menu', [$this->settings_controller, 'add_admin_menu'], 100);
+        add_action('admin_init', [$this->settings_controller, 'register_settings']);
+        add_action('wp_ajax_bonus_system_update_settings', [$this->settings_controller, 'ajax_update_settings']);
+    }
 
-        foreach ($sales as $sale) {
-            if ($sale->is_available($subtotal)) {
-                $current_discount = $sale->calculate_discount($subtotal);
+    public function activate()
+    {
+        $settings_model = new SettingsModel();
+        $settings_model->init_default_settings();
+    }
 
-                if ($best_bonus === null) {
-                    $best_bonus = $sale;
-                    continue;
-                }
+    public function deactivate()
+    {
 
-                $best_discount = $best_bonus->calculate_discount($subtotal);
-
-                if ($current_discount > $best_discount) {
-                    $best_bonus = $sale;
-                }
-            }
-        }
-
-        if ($best_bonus) {
-            add_action('woocommerce_cart_calculate_fees', function ($cart) use ($best_bonus) {
-                $best_bonus->add_bonus_discount($cart);
-            });
-        }
     }
 }
 
-new BonusSystem();
+try {
+    $plugin = BonusSystemPlugin::get_instance();
+    register_activation_hook(__FILE__, [$plugin, 'activate']);
+    register_deactivation_hook(__FILE__, [$plugin, 'deactivate']);
+} catch (\Throwable $exception) {
+    die(var_dump($exception));
+}

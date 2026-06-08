@@ -1,1 +1,3 @@
 /.srv
+!/.srv/custom.ini
+/.idea

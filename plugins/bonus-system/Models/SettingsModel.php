@@ -1,46 +1,31 @@
 <?php
+
 namespace BonusSystem\Models;
 
 class SettingsModel
 {
-    const OPTION_NAME = 'bonus_system_settings';
+    /**
+     * @var array<SalesBonus>
+     */
+    private array $sales;
 
-    public function get_settings(): array
-    {
-        $defaults = $this->get_defaults();
-        $settings = get_option(self::OPTION_NAME, $defaults);
-        return array_merge($defaults, $settings);
+    private bool $applying_best;
+
+    public function __construct(array $sales, bool $applying_best) {
+        $this->sales = $sales;
+        $this->applying_best = $applying_best;
     }
 
-    public function get_tiers(): array
+    /**
+     * @return array<SalesBonus>
+     */
+    public function get_sales(): array
     {
-        $settings = $this->get_settings();
-        return $settings['tiers'] ?? [];
+        return $this->sales;
     }
 
-    public function update_tiers(array $tiers): bool
+    public function apply_best(): bool
     {
-        $settings = $this->get_settings();
-        $settings['tiers'] = $tiers;
-        return update_option(self::OPTION_NAME, $settings);
-    }
-
-    public function get_defaults(): array
-    {
-        return [
-            'enabled' => true,
-            'tiers' => [],
-            'settings' => [
-                'apply_best' => true,
-                'show_notice' => true
-            ]
-        ];
-    }
-
-    public function init_default_settings(): void
-    {
-        if (get_option(self::OPTION_NAME) === false) {
-            add_option(self::OPTION_NAME, $this->get_defaults());
-        }
+        return $this->applying_best;
     }
 }

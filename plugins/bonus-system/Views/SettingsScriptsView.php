@@ -45,17 +45,17 @@ class SettingsScriptsView
             const newRow = `
                     <div class="bonus-tier-row" data-id="${rowId}">
                         <input type="number"
-                               name="${optionName}[tiers][${rowId}][min_amount]"
-                               placeholder="<?php _e('Мін. сума', 'bonus-system'); ?>"
+                               name="${optionName}[sales][${rowId}][min_price]"
+                               placeholder="<?php _e('Мінімальна ціна', 'bonus-system'); ?>"
                                class="regular-text"
                                step="any"
                                style="width: 150px;">
-                        <select name="${optionName}[tiers][${rowId}][discount_type]" class="discount-type">
-                            <option value="percent">% <?php _e('Відсоток', 'bonus-system'); ?></option>
+                        <select name="${optionName}[sales][${rowId}][discount_type]" class="discount-type">
+                            <option value="percent" selected>% <?php _e('Відсоток', 'bonus-system'); ?></option>
                             <option value="fixed">₴ <?php _e('Фіксована', 'bonus-system'); ?></option>
                         </select>
                         <input type="number"
-                               name="${optionName}[tiers][${rowId}][discount_value]"
+                               name="${optionName}[sales][${rowId}][discount_value]"
                                placeholder="<?php _e('Значення', 'bonus-system'); ?>"
                                class="discount-value"
                                step="any"

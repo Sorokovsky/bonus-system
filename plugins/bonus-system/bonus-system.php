@@ -69,6 +69,7 @@ class BonusSystemPlugin
     private function register_hooks(): void
     {
         add_action("admin_menu", [$this->settings_controller, "register_editing_page"], 100);
+        add_action("admin_init", [$this->settings_controller, "register_settings"]);
     }
 
     public function activate()

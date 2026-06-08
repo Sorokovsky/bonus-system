@@ -27,15 +27,17 @@ class SettingView
                 <?php
                 settings_fields(SettingsService::OPTION_NAME);
                 do_settings_sections(SettingsService::OPTION_NAME);
+                submit_button('Зберегти налаштування', 'bonus-system');
                 ?>
-                <table class="form-table">
-                    <?php $this->sales_editor_view->render($settings->get_sales()); ?>
-                </table>
-                <?php submit_button('Зберегти налаштування', 'bonus-system'); ?>
             </form>
         </div>
 <?php
         $this->settings_scripts_view->render($settings->get_sales());
         $this->settings_styles_view->render();
+    }
+
+    public function render_sales_fields(SettingsModel $settings): void
+    {
+        $this->sales_editor_view->render($settings->get_sales());
     }
 }

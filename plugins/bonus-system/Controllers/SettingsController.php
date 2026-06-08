@@ -31,4 +31,37 @@ class SettingsController
     {
         $this->view->render($this->service->get_settings());
     }
+
+    public function register_settings(): void
+    {
+        register_setting(
+            SettingsService::OPTION_NAME,
+            SettingsService::OPTION_NAME,
+            [
+                'type' => 'array',
+                'sanitize_callback' => [$this->service, 'sanitize_settings'],
+                'default' => [],
+            ]
+        );
+
+        add_settings_section(
+            'bonus-main-section',
+            __("Налаштування", 'bonus-system'),
+            null,
+            SettingsService::OPTION_NAME
+        );
+        add_settings_field(
+            'bonus_sales_fields',
+            __("Бонусні рівні", 'bonus-system'),
+            [$this, 'render_sales_fields'],
+            SettingsService::OPTION_NAME,
+            'bonus-main-section',
+            ['settings' => $this->service->get_settings()]
+        );
+    }
+
+    public function render_sales_fields(): void {
+        $settings = $this->service->get_settings();
+        $this->view->render_sales_fields($settings);
+    }
 }

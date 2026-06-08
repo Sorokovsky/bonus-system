@@ -57,7 +57,6 @@ class SettingsView
     private function render_tiers(array $tiers): void 
     {
         if (empty($tiers)) {
-            // Показуємо порожній рядок як приклад
             $this->render_tier_row(0, [
                 'min_amount' => '',
                 'discount_type' => 'percent',
@@ -113,19 +112,15 @@ class SettingsView
         ?>
         <script>
         jQuery(document).ready(function($) {
-            // Лічильник для нових рядків
             let nextId = <?php echo count($this->tiers); ?>;
             
-            // Функція оновлення індексів
             function updateIndexes() {
                 $('.bonus-tier-row').each(function(newIndex) {
                     const row = $(this);
                     const oldId = row.data('id');
                     
-                    // Оновлюємо data-id
                     row.data('id', newIndex);
                     
-                    // Оновлюємо name атрибути всіх полів
                     row.find('input, select').each(function() {
                         const $field = $(this);
                         const name = $field.attr('name');
@@ -136,11 +131,9 @@ class SettingsView
                     });
                 });
                 
-                // Оновлюємо лічильник
                 nextId = $('.bonus-tier-row').length;
             }
             
-            // Функція додавання нового рядка
             function addNewTier() {
                 const rowId = nextId;
                 const optionName = '<?php echo SettingsModel::OPTION_NAME; ?>';
@@ -173,41 +166,33 @@ class SettingsView
                 nextId++;
             }
             
-            // Функція видалення рядка
             function removeTier(button) {
                 const row = button.closest('.bonus-tier-row');
                 const container = $('#bonus-tiers-container');
                 
-                // Якщо це останній рядок, не видаляємо, а очищаємо
                 if (container.children('.bonus-tier-row').length === 1) {
                     row.find('input').val('');
                     row.find('select').val('percent');
                     return;
                 }
                 
-                // Видаляємо рядок
                 row.remove();
                 
-                // Оновлюємо індекси
                 updateIndexes();
             }
             
-            // Обробник додавання
             $('#add-tier').on('click', function(e) {
                 e.preventDefault();
                 addNewTier();
             });
             
-            // Обробник видалення (використовуємо event delegation)
             $(document).on('click', '.remove-tier', function(e) {
                 e.preventDefault();
                 removeTier($(this));
             });
             
-            // Ініціалізація: встановлюємо коректні індекси
             updateIndexes();
             
-            // Якщо немає жодного рядка, додаємо порожній
             if ($('.bonus-tier-row').length === 0) {
                 addNewTier();
             }

@@ -9,12 +9,18 @@ class SettingsView
 
     public function render(array $settings): void
     {
+        $this->tiers = $settings['tiers'] ?? [];
         ?>
         <div class="wrap">
             <h1><?php _e('Система бонусів', 'bonus-system'); ?></h1>
             
+            <?php settings_errors(); ?>
+            
             <form method="post" action="options.php">
-                <?php settings_fields('bonus_system_settings'); ?>
+                <?php
+                settings_fields('bonus_system_settings');
+                do_settings_sections('bonus_system_settings');
+                ?>
                 
                 <table class="form-table">
                     <tr>
@@ -23,7 +29,7 @@ class SettingsView
                             <input type="checkbox" 
                                    name="<?php echo SettingsModel::OPTION_NAME; ?>[enabled]" 
                                    value="1" 
-                                   <?php checked($settings['enabled'], true); ?>>
+                                   <?php checked($settings['enabled'] ?? false, true); ?>>
                         </td>
                     </tr>
                     
@@ -31,16 +37,16 @@ class SettingsView
                         <th><?php _e('Рівні бонусів', 'bonus-system'); ?></th>
                         <td>
                             <div id="bonus-tiers-container">
-                                <?php $this->render_tiers($settings['tiers']); ?>
+                                <?php $this->render_tiers($this->tiers); ?>
                             </div>
-                            <button type="button" class="button" id="add-tier">
+                            <button type="button" class="button button-primary" id="add-tier">
                                 + <?php _e('Додати рівень', 'bonus-system'); ?>
                             </button>
                         </td>
                     </tr>
                 </table>
                 
-                <?php submit_button(); ?>
+                <?php submit_button(__('Зберегти налаштування', 'bonus-system')); ?>
             </form>
         </div>
         
@@ -48,162 +54,195 @@ class SettingsView
         <?php
     }
 
-    private function render_tiers(array $tiers): void {
-        foreach ($tiers as $index => $tier) {
-            $this->render_tier_row($index, $tier);
+    private function render_tiers(array $tiers): void 
+    {
+        if (empty($tiers)) {
+            // Показуємо порожній рядок як приклад
+            $this->render_tier_row(0, [
+                'min_amount' => '',
+                'discount_type' => 'percent',
+                'discount_value' => ''
+            ]);
+        } else {
+            foreach ($tiers as $index => $tier) {
+                $this->render_tier_row($index, $tier);
+            }
         }
     }
 
     private function render_tier_row(int $index, array $tier): void 
     {
-    $discount_type = $tier['discount_type'] ?? 'percent';
-    $discount_percent = $tier['discount_percent'] ?? ($tier['discount_value'] ?? '');
-    $discount_fixed = $tier['discount_fixed'] ?? ($tier['discount_value'] ?? '');
-    ?>
-    <div class="bonus-tier-row" data-index="<?php echo $index; ?>">
-        <input type="number" 
-               name="<?php echo SettingsModel::OPTION_NAME; ?>[tiers][<?php echo $index; ?>][min_amount]" 
-               value="<?php echo esc_attr($tier['min_amount'] ?? ''); ?>" 
-               placeholder="Мін. сума" 
-               step="any"
-               style="width: 150px;">
-        
-        <select name="<?php echo SettingsModel::OPTION_NAME; ?>[tiers][<?php echo $index; ?>][discount_type]"
-                class="discount-type">
-            <option value="percent" <?php selected($discount_type, 'percent'); ?>>
-                % Відсоток
-            </option>
-            <option value="fixed" <?php selected($discount_type, 'fixed'); ?>>
-                ₴ Фіксована
-            </option>
-        </select>
-        
-        <input type="number" 
-               name="<?php echo SettingsModel::OPTION_NAME; ?>[tiers][<?php echo $index; ?>][discount_percent]" 
-               value="<?php echo esc_attr($discount_percent); ?>" 
-               placeholder="Відсоток" 
-               step="any"
-               style="width: 120px; <?php echo $discount_type !== 'percent' ? 'display:none;' : ''; ?>"
-               class="discount-percent">
-        
-        <input type="number" 
-               name="<?php echo SettingsModel::OPTION_NAME; ?>[tiers][<?php echo $index; ?>][discount_fixed]" 
-               value="<?php echo esc_attr($discount_fixed); ?>" 
-               placeholder="Сума" 
-               step="any"
-               style="width: 120px; <?php echo $discount_type !== 'fixed' ? 'display:none;' : ''; ?>"
-               class="discount-fixed">
-        
-        <button type="button" class="button remove-tier">×</button>
-    </div>
-    <?php
-}
-    private function render_scripts(): void {
-    $tier_count = count($this->tiers);
-    ?>
-    <script>
-    jQuery(document).ready(function($) {
-        let tierCount = <?php echo $tier_count; ?>;
-        const optionName = '<?php echo SettingsModel::OPTION_NAME; ?>';
-        
-        // Функція для показу/приховування полів
-        function toggleDiscountFields(select) {
-            const row = select.closest('.bonus-tier-row');
-            const type = select.val();
+        $discount_value = $tier['discount_value'] ?? ($tier['discount_percent'] ?? ($tier['discount_fixed'] ?? ''));
+        ?>
+        <div class="bonus-tier-row" data-id="<?php echo $index; ?>">
+            <input type="number" 
+                   name="<?php echo SettingsModel::OPTION_NAME; ?>[tiers][<?php echo $index; ?>][min_amount]" 
+                   value="<?php echo esc_attr($tier['min_amount'] ?? ''); ?>" 
+                   placeholder="<?php _e('Мін. сума', 'bonus-system'); ?>" 
+                   class="regular-text"
+                   step="any"
+                   style="width: 150px;">
             
-            if (type === 'percent') {
-                row.find('.discount-percent').show();
-                row.find('.discount-fixed').hide();
-                row.find('.discount-fixed').val('');
-            } else {
-                row.find('.discount-percent').hide();
-                row.find('.discount-fixed').show();
-                row.find('.discount-percent').val('');
+            <select name="<?php echo SettingsModel::OPTION_NAME; ?>[tiers][<?php echo $index; ?>][discount_type]" 
+                    class="discount-type">
+                <option value="percent" <?php selected($tier['discount_type'] ?? '', 'percent'); ?>>
+                    % <?php _e('Відсоток', 'bonus-system'); ?>
+                </option>
+                <option value="fixed" <?php selected($tier['discount_type'] ?? '', 'fixed'); ?>>
+                    ₴ <?php _e('Фіксована', 'bonus-system'); ?>
+                </option>
+            </select>
+            
+            <input type="number" 
+                   name="<?php echo SettingsModel::OPTION_NAME; ?>[tiers][<?php echo $index; ?>][discount_value]" 
+                   value="<?php echo esc_attr($discount_value); ?>" 
+                   placeholder="<?php _e('Значення', 'bonus-system'); ?>" 
+                   class="discount-value"
+                   step="any"
+                   style="width: 120px;">
+            
+            <button type="button" class="button remove-tier">
+                <?php _e('Видалити', 'bonus-system'); ?>
+            </button>
+        </div>
+        <?php
+    }
+
+    private function render_scripts(): void 
+    {
+        ?>
+        <script>
+        jQuery(document).ready(function($) {
+            // Лічильник для нових рядків
+            let nextId = <?php echo count($this->tiers); ?>;
+            
+            // Функція оновлення індексів
+            function updateIndexes() {
+                $('.bonus-tier-row').each(function(newIndex) {
+                    const row = $(this);
+                    const oldId = row.data('id');
+                    
+                    // Оновлюємо data-id
+                    row.data('id', newIndex);
+                    
+                    // Оновлюємо name атрибути всіх полів
+                    row.find('input, select').each(function() {
+                        const $field = $(this);
+                        const name = $field.attr('name');
+                        if (name) {
+                            const newName = name.replace(/tiers\]\[\d+\]/, `tiers][${newIndex}]`);
+                            $field.attr('name', newName);
+                        }
+                    });
+                });
+                
+                // Оновлюємо лічильник
+                nextId = $('.bonus-tier-row').length;
             }
-        }
-        
-        // Додати новий рівень
-        $('#add-tier').on('click', function() {
-            const template = `
-                <div class="bonus-tier-row" data-index="${tierCount}">
-                    <input type="number" 
-                           name="${optionName}[tiers][${tierCount}][min_amount]" 
-                           placeholder="Мін. сума" 
-                           step="any"
-                           style="width: 150px;">
-                    <select name="${optionName}[tiers][${tierCount}][discount_type]" class="discount-type">
-                        <option value="percent">% Відсоток</option>
-                        <option value="fixed">₴ Фіксована</option>
-                    </select>
-                    <input type="number" 
-                           name="${optionName}[tiers][${tierCount}][discount_percent]" 
-                           placeholder="Відсоток" 
-                           step="any"
-                           style="width: 120px;"
-                           class="discount-percent">
-                    <input type="number" 
-                           name="${optionName}[tiers][${tierCount}][discount_fixed]" 
-                           placeholder="Сума" 
-                           step="any"
-                           style="width: 120px; display: none;"
-                           class="discount-fixed">
-                    <button type="button" class="button remove-tier">×</button>
-                </div>
-            `;
-            $('#bonus-tiers-container').append(template);
             
-            // Налаштувати обробник для нового рядка
-            const newRow = $('.bonus-tier-row').last();
-            toggleDiscountFields(newRow.find('.discount-type'));
-            newRow.find('.discount-type').on('change', function() {
-                toggleDiscountFields($(this));
+            // Функція додавання нового рядка
+            function addNewTier() {
+                const rowId = nextId;
+                const optionName = '<?php echo SettingsModel::OPTION_NAME; ?>';
+                
+                const newRow = `
+                    <div class="bonus-tier-row" data-id="${rowId}">
+                        <input type="number" 
+                               name="${optionName}[tiers][${rowId}][min_amount]" 
+                               placeholder="<?php _e('Мін. сума', 'bonus-system'); ?>" 
+                               class="regular-text"
+                               step="any"
+                               style="width: 150px;">
+                        <select name="${optionName}[tiers][${rowId}][discount_type]" class="discount-type">
+                            <option value="percent">% <?php _e('Відсоток', 'bonus-system'); ?></option>
+                            <option value="fixed">₴ <?php _e('Фіксована', 'bonus-system'); ?></option>
+                        </select>
+                        <input type="number" 
+                               name="${optionName}[tiers][${rowId}][discount_value]" 
+                               placeholder="<?php _e('Значення', 'bonus-system'); ?>" 
+                               class="discount-value"
+                               step="any"
+                               style="width: 120px;">
+                        <button type="button" class="button remove-tier">
+                            <?php _e('Видалити', 'bonus-system'); ?>
+                        </button>
+                    </div>
+                `;
+                
+                $('#bonus-tiers-container').append(newRow);
+                nextId++;
+            }
+            
+            // Функція видалення рядка
+            function removeTier(button) {
+                const row = button.closest('.bonus-tier-row');
+                const container = $('#bonus-tiers-container');
+                
+                // Якщо це останній рядок, не видаляємо, а очищаємо
+                if (container.children('.bonus-tier-row').length === 1) {
+                    row.find('input').val('');
+                    row.find('select').val('percent');
+                    return;
+                }
+                
+                // Видаляємо рядок
+                row.remove();
+                
+                // Оновлюємо індекси
+                updateIndexes();
+            }
+            
+            // Обробник додавання
+            $('#add-tier').on('click', function(e) {
+                e.preventDefault();
+                addNewTier();
             });
             
-            tierCount++;
+            // Обробник видалення (використовуємо event delegation)
+            $(document).on('click', '.remove-tier', function(e) {
+                e.preventDefault();
+                removeTier($(this));
+            });
+            
+            // Ініціалізація: встановлюємо коректні індекси
+            updateIndexes();
+            
+            // Якщо немає жодного рядка, додаємо порожній
+            if ($('.bonus-tier-row').length === 0) {
+                addNewTier();
+            }
         });
+        </script>
         
-        // Обробник зміни типу знижки
-        $(document).on('change', '.discount-type', function() {
-            toggleDiscountFields($(this));
-        });
-        
-        // Видалити рівень
-        $(document).on('click', '.remove-tier', function() {
-            $(this).closest('.bonus-tier-row').remove();
-        });
-        
-        // Ініціалізація - налаштувати всі існуючі рядки
-        $('.discount-type').each(function() {
-            toggleDiscountFields($(this));
-        });
-        
-        // Автоматично показати хоча б один рядок, якщо їх немає
-        if ($('.bonus-tier-row').length === 0) {
-            $('#add-tier').click();
-        }
-    });
-    </script>
-    
-    <style>
-        .bonus-tier-row {
-            margin-bottom: 10px;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .bonus-tier-row input,
-        .bonus-tier-row select {
-            margin: 0;
-        }
-        .remove-tier {
-            color: red;
-            border-color: red;
-        }
-        .remove-tier:hover {
-            background-color: #ff000011;
-        }
-    </style>
-    <?php
-}
+        <style>
+            .bonus-tier-row {
+                margin-bottom: 15px;
+                padding: 10px;
+                background: #f9f9f9;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+            .bonus-tier-row input,
+            .bonus-tier-row select {
+                margin: 0;
+            }
+            .bonus-tier-row .remove-tier {
+                color: #dc3232;
+                border-color: #dc3232;
+            }
+            .bonus-tier-row .remove-tier:hover {
+                background-color: #dc3232;
+                color: white;
+                border-color: #dc3232;
+            }
+            #add-tier {
+                margin-top: 10px;
+            }
+        </style>
+        <?php
+    }
 }

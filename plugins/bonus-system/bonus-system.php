@@ -19,6 +19,7 @@ use BonusSystem\Parsers\SalesBonusParser;
 use BonusSystem\Parsers\TextsParser;
 use BonusSystem\Services\BonusesService;
 use BonusSystem\Services\SettingsService;
+use BonusSystem\Views\Client\CartView;
 use BonusSystem\Views\Editor\SettingView;
 
 if (!defined("ABSPATH")) {
@@ -65,12 +66,19 @@ class BonusSystemPlugin
 
     private function init_controllers(): void
     {
-        $settings_service = new SettingsService(new ApplyingBestParser(), new SalesBonusParser(), new TextsParser());
+        $service = new SettingsService(
+            new ApplyingBestParser(),
+            new SalesBonusParser(),
+            new TextsParser()
+        );
         $this->settings_controller = new SettingsController(
-            $settings_service,
+            $service,
             new SettingView()
         );
-        $this->bonuses_controller = new BonusesController(new BonusesService($settings_service));
+        $this->bonuses_controller = new BonusesController(
+            new BonusesService($service),
+            new CartView()
+        );
     }
 
     private function register_hooks(): void
@@ -79,6 +87,16 @@ class BonusSystemPlugin
         add_action("admin_init", [$this->settings_controller, "register_settings"]);
         add_action("woocommerce_calculate_fees", [$this->bonuses_controller, 'apply']);
         add_action("woocommerce_cart_loaded_from_session", [$this->bonuses_controller, 'apply'], 10, 1);
+    }
+
+    public function override_cart(string $content): string
+    {
+        if (is_cart() && in_the_loop() && is_main_query()) {
+            ob_start();
+            $this->bonuses_controller->cart_page();
+            return ob_get_clean();
+        }
+        return $content;
     }
 
     public function activate()

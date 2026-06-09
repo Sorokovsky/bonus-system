@@ -40,6 +40,18 @@ class BonusesService
     }
 
     /**
+     * Summary of get_all
+     * @return array<Bonus>
+     */
+    public function get_all(): array
+    {
+        $settings = $this->settings_service->get_settings();
+        $all_bonuses = array_merge($settings->get_sales(), $settings->get_texts());
+        usort($all_bonuses, fn($a, $b) => $a->get_min_price() <=> $b->get_min_price());
+        return $all_bonuses;
+    }
+
+    /**
      * Summary of get_texts
      * @return array<TextBonus>
      */

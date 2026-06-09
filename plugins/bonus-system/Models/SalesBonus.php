@@ -2,17 +2,21 @@
 
 namespace BonusSystem\Models;
 
+use Override;
+
 class SalesBonus implements Bonus
 {
     private float $min_price;
     private DiscountType $discount_type;
     private float $discount_amount;
+    private bool $activated;
 
     public function __construct(float $min_price, DiscountType $discount_type, float $discount_amount)
     {
         $this->min_price = $min_price;
         $this->discount_type = $discount_type;
         $this->discount_amount = $discount_amount;
+        $this->activated = false;
     }
 
     public function get_name(): string
@@ -23,6 +27,13 @@ class SalesBonus implements Bonus
         };
     }
 
+    #[Override]
+    public function is_activated(): bool
+    {
+        return $this->activated;
+    }
+
+    #[Override]
     public function get_min_price(): float
     {
         return $this->min_price;
@@ -57,6 +68,7 @@ class SalesBonus implements Bonus
 
             if ($discount > 0) {
                 $cart->add_fee($this->get_name(), -$discount);
+                $this->activated = true;
             }
         }, 10, 1);
     }

@@ -68,9 +68,7 @@ class BonusesService
     private function apply_sales(): void
     {
         $sales = $this->get_sales();
-        usort($sales, function ($a, $b) {
-            return $a->get_min_price() <=> $b->get_min_price();
-        });
+        usort($sales, fn($a, $b) => $a->get_min_price() <=> $b->get_min_price());
 
         $best_bonus = null;
         foreach ($sales as $sale) {

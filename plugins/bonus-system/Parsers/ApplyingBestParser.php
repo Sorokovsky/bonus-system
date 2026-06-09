@@ -2,7 +2,7 @@
 namespace BonusSystem\Parsers;
 
 /**
- * @extends Parser<boolean>
+ * @implements Parser<boolean>
  */
 class ApplyingBestParser implements Parser
 {

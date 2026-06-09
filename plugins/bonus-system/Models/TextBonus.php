@@ -35,6 +35,9 @@ class TextBonus implements Bonus
     #[Override]
     public function can_activate(): bool
     {
-        throw new \Exception('Not implemented');
+        if (!function_exists("WC") || WC()->cart === null) {
+            return false;
+        }
+        return WC()->cart->get_subtotal() >= $this->min_price;
     }
 }

@@ -2,7 +2,6 @@
 namespace BonusSystem\Views\Editor;
 
 use BonusSystem\Models\SalesBonus;
-use BonusSystem\Services\SettingsService;
 
 class SalesEditorView
 {

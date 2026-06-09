@@ -5,12 +5,11 @@ namespace BonusSystem\Services;
 use BonusSystem\Models\SettingsModel;
 use BonusSystem\Parsers\ApplyingBestParser;
 use BonusSystem\Parsers\SalesBonusParser;
-use BonusSystem\Parsers\TextsParse;
 use BonusSystem\Parsers\TextsParser;
 
 class SettingsService
 {
-    const OPTION_NAME = 'bonus_system_settings';
+    public const OPTION_NAME = 'bonus_system_settings';
 
     private ApplyingBestParser $applying_best_parser;
 
@@ -28,7 +27,11 @@ class SettingsService
     public function get_settings(): SettingsModel
     {
         $settings = get_option(self::OPTION_NAME, array());
-        return new SettingsModel($this->sales_bonus_parser->parse($settings), $this->applying_best_parser->parse($settings), $this->texts_parser->parse($settings));
+        return new SettingsModel(
+            $this->sales_bonus_parser->parse($settings),
+            $this->applying_best_parser->parse($settings),
+            $this->texts_parser->parse($settings)
+        );
     }
 
     public function sanitize_settings(mixed $input): array

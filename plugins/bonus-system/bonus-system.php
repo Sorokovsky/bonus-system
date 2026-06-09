@@ -16,7 +16,6 @@ use BonusSystem\Controllers\BonusesController;
 use BonusSystem\Controllers\SettingsController;
 use BonusSystem\Parsers\ApplyingBestParser;
 use BonusSystem\Parsers\SalesBonusParser;
-use BonusSystem\Parsers\TextsParse;
 use BonusSystem\Parsers\TextsParser;
 use BonusSystem\Services\BonusesService;
 use BonusSystem\Services\SettingsService;

@@ -8,6 +8,7 @@ use BonusSystem\Services\SettingsService;
 class SettingView
 {
     private SalesEditorView $sales_editor_view;
+    private TextsEditorView $texts_editor_view;
     private SettingsScriptsView $settings_scripts_view;
     private SettingsStylesView $settings_styles_view;
 
@@ -16,6 +17,7 @@ class SettingView
         $this->sales_editor_view = new SalesEditorView();
         $this->settings_scripts_view = new SettingsScriptsView();
         $this->settings_styles_view = new SettingsStylesView();
+        $this->texts_editor_view = new TextsEditorView();
     }
 
     public function render(SettingsModel $settings): void
@@ -33,12 +35,13 @@ class SettingView
             </form>
         </div>
         <?php
-        $this->settings_scripts_view->render($settings->get_sales());
+        $this->settings_scripts_view->render($settings->get_sales(), $settings->get_texts());
         $this->settings_styles_view->render();
     }
 
     public function render_sales_fields(SettingsModel $settings): void
     {
         $this->sales_editor_view->render($settings->get_sales());
+        $this->texts_editor_view->render($settings->get_texts());
     }
 }

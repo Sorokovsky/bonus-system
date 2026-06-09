@@ -1,8 +1,8 @@
 <?php
-
 namespace BonusSystem\Views\Editor;
 
 use BonusSystem\Models\SalesBonus;
+use BonusSystem\Services\SettingsService;
 
 class SalesEditorView
 {
@@ -29,7 +29,7 @@ class SalesEditorView
                     }
                     ?>
                 </div>
-                <button type="button" class="button button-primary" id="add-tier">
+                <button type="button" class="button button-primary" id="add-sales-tier">
                     + <?php _e('Додати рівень', 'bonus-system'); ?>
                 </button>
             </td>

@@ -16,6 +16,8 @@ use BonusSystem\Controllers\BonusesController;
 use BonusSystem\Controllers\SettingsController;
 use BonusSystem\Parsers\ApplyingBestParser;
 use BonusSystem\Parsers\SalesBonusParser;
+use BonusSystem\Parsers\TextsParse;
+use BonusSystem\Parsers\TextsParser;
 use BonusSystem\Services\BonusesService;
 use BonusSystem\Services\SettingsService;
 use BonusSystem\Views\Editor\SettingView;
@@ -64,7 +66,7 @@ class BonusSystemPlugin
 
     private function init_controllers(): void
     {
-        $settings_service = new SettingsService(new ApplyingBestParser(), new SalesBonusParser());
+        $settings_service = new SettingsService(new ApplyingBestParser(), new SalesBonusParser(), new TextsParser());
         $this->settings_controller = new SettingsController(
             $settings_service,
             new SettingView()

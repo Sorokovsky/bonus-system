@@ -18,12 +18,13 @@ class SalesBonus implements Bonus
     public function get_name(): string
     {
         return match ($this->discount_type) {
-            DiscountType::FIXED => sprintf(__("Бонусна знижка %s% (від %s ₴)", "bonus-system"), $this->discount_amount, $this->min_price),
-            DiscountType::PERCENT => sprintf(__("Бонусна знижка %s₴ (від %s ₴)", "bonus-system"), $this->discount_amount, $this->min_price),
+            DiscountType::PERCENT => sprintf(__("Бонусна знижка %s% (від %s ₴)", "bonus-system"), $this->discount_amount, $this->min_price),
+            DiscountType::FIXED => sprintf(__("Бонусна знижка %s₴ (від %s ₴)", "bonus-system"), $this->discount_amount, $this->min_price),
         };
     }
 
-    public function get_min_price(): float {
+    public function get_min_price(): float
+    {
         return $this->min_price;
     }
 
@@ -42,21 +43,20 @@ class SalesBonus implements Bonus
         if (!function_exists("WC") || !isset(WC()->cart)) {
             return false;
         }
-
-        return WC()->cart->get_subtotal() <= $this->min_price;
+        return WC()->cart->get_subtotal() >= $this->min_price;
     }
 
     public function activate(): void
     {
-        do_action('woocommerce_cart_calculate_fees', function (\WC_Cart $cart) {
+        add_action('woocommerce_cart_calculate_fees', function (\WC_Cart $cart) {
             $subtotal = $cart->get_subtotal();
-            $discount = match($this->discount_type) {
-              DiscountType::FIXED => $this->discount_amount,
-              DiscountType::PERCENT => $subtotal * ($this->discount_amount / 100)
+            $discount = match ($this->discount_type) {
+                DiscountType::FIXED => $this->discount_amount,
+                DiscountType::PERCENT => $subtotal * ($this->discount_amount / 100)
             };
             if ($discount > 0) {
                 $cart->add_fee($this->get_name(), -$discount);
             }
-        });
+        }, 10, 1);
     }
 }

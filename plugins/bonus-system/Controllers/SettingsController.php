@@ -3,14 +3,15 @@
 namespace BonusSystem\Controllers;
 
 use BonusSystem\Services\SettingsService;
-use BonusSystem\Views\SettingView;
+use BonusSystem\Views\Editor\SettingView;
 
 class SettingsController
 {
     private SettingsService $service;
     private SettingView $view;
 
-    public function __construct(SettingsService $service, SettingView $view) {
+    public function __construct(SettingsService $service, SettingView $view)
+    {
         $this->service = $service;
         $this->view = $view;
     }
@@ -60,7 +61,8 @@ class SettingsController
         );
     }
 
-    public function render_sales_fields(): void {
+    public function render_sales_fields(): void
+    {
         $settings = $this->service->get_settings();
         $this->view->render_sales_fields($settings);
     }

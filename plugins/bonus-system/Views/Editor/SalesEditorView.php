@@ -1,6 +1,6 @@
 <?php
 
-namespace BonusSystem\Views;
+namespace BonusSystem\Views\Editor;
 
 use BonusSystem\Models\SalesBonus;
 
@@ -16,7 +16,7 @@ class SalesEditorView
     /**
      * @param array<SalesBonus> $sales
      */
-    public function render(array $sales) : void
+    public function render(array $sales): void
     {
         ?>
         <tr>

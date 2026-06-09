@@ -1,6 +1,6 @@
 <?php
 
-namespace BonusSystem\Views;
+namespace BonusSystem\Views\Editor;
 
 use BonusSystem\Models\SettingsModel;
 use BonusSystem\Services\SettingsService;
@@ -18,7 +18,8 @@ class SettingView
         $this->settings_styles_view = new SettingsStylesView();
     }
 
-    public function render(SettingsModel $settings): void {
+    public function render(SettingsModel $settings): void
+    {
         ?>
         <div class="wrap">
             <h1><?php _e('Система бонусів', 'bonus-system') ?></h1>
@@ -31,7 +32,7 @@ class SettingView
                 ?>
             </form>
         </div>
-<?php
+        <?php
         $this->settings_scripts_view->render($settings->get_sales());
         $this->settings_styles_view->render();
     }

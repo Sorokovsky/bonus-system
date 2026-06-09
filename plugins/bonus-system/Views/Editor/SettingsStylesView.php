@@ -1,6 +1,6 @@
 <?php
 
-namespace BonusSystem\Views;
+namespace BonusSystem\Views\Editor;
 
 class SettingsStylesView
 {
@@ -19,23 +19,27 @@ class SettingsStylesView
                 align-items: center;
                 flex-wrap: wrap;
             }
+
             .bonus-tier-row input,
             .bonus-tier-row select {
                 margin: 0;
             }
+
             .bonus-tier-row .remove-tier {
                 color: #dc3232;
                 border-color: #dc3232;
             }
+
             .bonus-tier-row .remove-tier:hover {
                 background-color: #dc3232;
                 color: white;
                 border-color: #dc3232;
             }
+
             #add-tier {
                 margin-top: 10px;
             }
         </style>
-<?php
+        <?php
     }
 }

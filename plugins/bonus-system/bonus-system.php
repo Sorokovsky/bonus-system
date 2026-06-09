@@ -12,11 +12,13 @@ Text Domain: bonus-system
 
 namespace BonusSystem;
 
+use BonusSystem\Controllers\BonusesController;
 use BonusSystem\Controllers\SettingsController;
 use BonusSystem\Parsers\ApplyingBestParser;
 use BonusSystem\Parsers\SalesBonusParser;
+use BonusSystem\Services\BonusesService;
 use BonusSystem\Services\SettingsService;
-use BonusSystem\Views\SettingView;
+use BonusSystem\Views\Editor\SettingView;
 
 if (!defined("ABSPATH")) {
     exit;
@@ -44,6 +46,8 @@ class BonusSystemPlugin
 
     private SettingsController $settings_controller;
 
+    private BonusesController $bonuses_controller;
+
     public static function get_instance(): BonusSystemPlugin
     {
         if (self::$instance === null) {
@@ -60,16 +64,20 @@ class BonusSystemPlugin
 
     private function init_controllers(): void
     {
+        $settings_service = new SettingsService(new ApplyingBestParser(), new SalesBonusParser());
         $this->settings_controller = new SettingsController(
-            new SettingsService(new ApplyingBestParser(), new SalesBonusParser()),
+            $settings_service,
             new SettingView()
         );
+        $this->bonuses_controller = new BonusesController(new BonusesService($settings_service));
     }
 
     private function register_hooks(): void
     {
         add_action("admin_menu", [$this->settings_controller, "register_editing_page"], 100);
         add_action("admin_init", [$this->settings_controller, "register_settings"]);
+        add_action("woocommerce_calculate_fees", [$this->bonuses_controller, 'apply']);
+        add_action("woocommerce_cart_loaded_from_session", [$this->bonuses_controller, 'apply'], 10, 1);
     }
 
     public function activate()

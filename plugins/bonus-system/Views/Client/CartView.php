@@ -22,7 +22,7 @@ class CartView
         $differcence = $this->get_difference($all_bonuses, $activated_bonuses);
         $percent = $this->get_percent();
         if ($all_count !== $activated_count) {
-            $next_text = 'Для отримання "' . $this->next->get_name() . '" доберіть товарів, ще на ' . $differcence . ' грн';
+            $next_text = 'Щоб скористатися бонусом "' . $this->next->get_name() . '" доберіть товарів ще на ' . $differcence . ' грн';
         }
         $html = '';
         $html .= <<<HTML

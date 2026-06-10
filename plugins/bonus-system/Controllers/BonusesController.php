@@ -21,9 +21,8 @@ class BonusesController
         $this->service->apply();
     }
 
-    public function cart_page(): void
+    public function cart_page(): string
     {
-        $this->view->render($this->service->get_all());
-        exit;
+        return $this->view->render($this->service->get_all(), $this->service->get_activated_bonuses());
     }
 }

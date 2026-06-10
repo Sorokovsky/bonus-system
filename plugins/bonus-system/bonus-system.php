@@ -85,16 +85,17 @@ class BonusSystemPlugin
     {
         add_action("admin_menu", [$this->settings_controller, "register_editing_page"], 100);
         add_action("admin_init", [$this->settings_controller, "register_settings"]);
-        add_action("woocommerce_calculate_fees", [$this->bonuses_controller, 'apply']);
+        add_action("woocommerce_calculate_fees", [$this->bonuses_controller, 'apply'], 10, 1);
         add_action("woocommerce_cart_loaded_from_session", [$this->bonuses_controller, 'apply'], 10, 1);
+        add_filter("the_content", [$this, 'override_cart'], 999);
     }
 
     public function override_cart(string $content): string
     {
-        if (is_cart() && in_the_loop() && is_main_query()) {
-            ob_start();
-            $this->bonuses_controller->cart_page();
-            return ob_get_clean();
+        if (is_cart()) {
+            WC()->cart->calculate_totals();
+            do_action('woocommerce_cart_calculate_fees', WC()->cart);
+            return $this->bonuses_controller->cart_page() . $content;
         }
         return $content;
     }

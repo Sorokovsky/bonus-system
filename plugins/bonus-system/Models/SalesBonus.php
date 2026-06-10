@@ -22,8 +22,8 @@ class SalesBonus implements Bonus
     public function get_name(): string
     {
         return match ($this->discount_type) {
-            DiscountType::PERCENT => sprintf(__("Бонусна знижка %s%% (від %s ₴)", "bonus-system"), $this->discount_amount, $this->min_price),
-            DiscountType::FIXED => sprintf(__("Бонусна знижка %s₴ (від %s ₴)", "bonus-system"), $this->discount_amount, $this->min_price),
+            DiscountType::PERCENT => sprintf(__("Знижка %s%%", "bonus-system"), $this->discount_amount),
+            DiscountType::FIXED => sprintf(__("Знижка %s₴", "bonus-system"), $this->discount_amount),
         };
     }
 

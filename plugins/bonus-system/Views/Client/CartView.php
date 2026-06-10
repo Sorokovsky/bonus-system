@@ -13,21 +13,35 @@ class CartView
      * @param array<Bonus> $all_bonuses
      * @param array<Bonus> $activated_bonuses
      */
-    public function render(array $all_bonuses, array $activated_bonues): string
+    public function render(array $all_bonuses, array $activated_bonuses): string
     {
+        $subtotal = WC()->cart->get_subtotal();
         $all_count = count($all_bonuses);
-        $activated_count = count($activated_bonues);
-        $activated_percent = ($activated_count * 100) / $all_count;
+        $activated_count = count($activated_bonuses);
         $next_text = 'Всі бонуси активавано';
-        $differcence = $this->get_difference($all_bonuses, $activated_bonues);
+        $differcence = $this->get_difference($all_bonuses, $activated_bonuses);
+        $percent = $this->get_percent();
         if ($all_count !== $activated_count) {
             $next_text = 'Для отримання "' . $this->next->get_name() . '" доберіть товарів, ще на ' . $differcence . ' грн';
         }
-        $html = <<<HTML
+        $html = '';
+        $html .= <<<HTML
         <div class="bonus-cart-container">
             <h2>{$next_text}</h2>
             <div class='range'>
-                <span class='range-body' style='width: {$activated_percent}%'></span>
+                <span class='range-body' style='width: {$percent}%'></span>
+            </div>
+            <div class='bonuses'>
+                <h3>Застосовані бонуси</h3>
+                <ul>
+HTML;
+        foreach ($activated_bonuses as $bonus) {
+            $html .= <<<HTML
+                            <li>{$bonus->get_name()}</li>
+                        HTML;
+        }
+        $html .= <<<HTML
+                </ul>
             </div>
         </div>
         <style>
@@ -73,5 +87,15 @@ class CartView
             return 0;
         }
         return $this->next->get_min_price() - $last_activated->get_min_price();
+    }
+
+    private function get_percent(): float
+    {
+        if ($this->next === null) {
+            return 100;
+        }
+        $subtotal = WC()->cart->get_subtotal();
+        $bonus_price = $this->next->get_min_price();
+        return min(($subtotal * 100) / $bonus_price, 100);
     }
 }

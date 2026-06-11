@@ -96,56 +96,12 @@ class BonusSystemPlugin
         if (!is_cart()) {
             return;
         }
-        wp_add_inline_script('jquery', '
-        (function() {
-            let isReloading = false;
-            
-            function reloadPage() {
-                if (!isReloading) {
-                    isReloading = true;
-                    window.location.reload();
-                }
-            }
-            
-            // 1. Перехоплюємо всі fetch запити
-            const originalFetch = window.fetch;
-            window.fetch = function() {
-                const url = arguments[0];
-                const promise = originalFetch.apply(this, arguments);
-                
-                // Перевіряємо, чи це запит до WooCommerce
-                if (typeof url === "string" && (url.includes("wc/store") || url.includes("cart") || url.includes("wc/"))) {
-                    promise.then(function(response) {
-                        if (response.ok && !isReloading) {
-                            reloadPage();
-                        }
-                    }).catch(function() {});
-                }
-                return promise;
-            };
-            
-            // 2. Перехоплюємо XMLHttpRequest
-            const originalOpen = XMLHttpRequest.prototype.open;
-            const originalSend = XMLHttpRequest.prototype.send;
-            
-            XMLHttpRequest.prototype.open = function() {
-                this._url = arguments[1];
-                return originalOpen.apply(this, arguments);
-            };
-            
-            XMLHttpRequest.prototype.send = function() {
-                const url = this._url;
-                this.addEventListener("load", function() {
-                    if (this.status === 200 && url && (url.includes("wc/store") || url.includes("cart") || url.includes("wc/"))) {
-                        if (!isReloading) {
-                            reloadPage();
-                        }
-                    }
-                });
-                return originalSend.apply(this, arguments);
-            };
-        })();
-    ');
+        wp_enqueue_script(
+            'force_reload',
+            plugin_dir_url(__FILE__) . "assets/js/force-reload.js",
+            ['jquery'],
+            '1.0.0'
+        );
     }
 
     public function override_cart(string $content): string

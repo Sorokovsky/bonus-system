@@ -1,4 +1,8 @@
 (function () {
+    function isCartQuery(url) {
+        return url && (url.includes("wc/store") || url.includes("cart") || url.includes("wc/"));
+    }
+
     let isReloading = false;
     function reloadPage() {
         if (!isReloading) {
@@ -10,7 +14,7 @@
     window.fetch = function () {
         const url = arguments[0];
         const promise = originalFetch.apply(this, arguments);
-        if (typeof url === "string" && (url.includes("wc/store") || url.includes("cart") || url.includes("wc/"))) {
+        if (typeof url === "string" && isCartQuery(url)) {
             promise.then(function (response) {
                 if (response.ok && !isReloading) {
                     reloadPage();
@@ -28,7 +32,7 @@
     XMLHttpRequest.prototype.send = function () {
         const url = this._url;
         this.addEventListener("load", function () {
-            if (this.status === 200 && url && (url.includes("wc/store") || url.includes("cart") || url.includes("wc/"))) {
+            if (this.status === 200 && isCartQuery(url)) {
                 if (!isReloading) {
                     reloadPage();
                 }

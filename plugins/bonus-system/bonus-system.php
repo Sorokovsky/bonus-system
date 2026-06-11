@@ -89,6 +89,7 @@ class BonusSystemPlugin
         add_action("woocommerce_cart_loaded_from_session", [$this->bonuses_controller, 'apply'], 10, 1);
         add_filter("the_content", [$this, 'override_cart'], 999);
         add_action('wp_enqueue_scripts', [$this, 'force_reload']);
+        add_action('woocommerce_checkout_order_processed', [$this->bonuses_controller, 'save_bonuses'], 10, 2);
     }
 
     public function force_reload(): void
@@ -106,10 +107,13 @@ class BonusSystemPlugin
 
     public function override_cart(string $content): string
     {
-        if (is_cart()) {
-            WC()->cart->calculate_totals();
-            do_action('woocommerce_cart_calculate_fees', WC()->cart);
-            return $this->bonuses_controller->cart_page() . $content;
+        try {
+            if (is_cart()) {
+                WC()->cart->calculate_totals();
+                do_action('woocommerce_cart_calculate_fees', WC()->cart);
+                return $this->bonuses_controller->cart_page() . $content;
+            }
+        } catch (\Throwable $ex) {
         }
         return $content;
     }

@@ -26,7 +26,7 @@ if (!defined("ABSPATH")) {
     exit;
 }
 
-spl_autoload_register(function ($class) {
+spl_autoload_register(function (string $class) {
     $prefix = 'BonusSystem\\';
     $base_dir = __DIR__ . '/';
     $length = strlen($prefix);

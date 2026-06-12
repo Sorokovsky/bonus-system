@@ -19,6 +19,8 @@ use BonusSystem\Parsers\SalesBonusParser;
 use BonusSystem\Parsers\TextsParser;
 use BonusSystem\Services\BonusesService;
 use BonusSystem\Services\SettingsService;
+use BonusSystem\Views\Client\ActivatedBonusesView;
+use BonusSystem\Views\Client\BonusProgresView;
 use BonusSystem\Views\Client\CartView;
 use BonusSystem\Views\Editor\SettingView;
 
@@ -77,7 +79,8 @@ class BonusSystemPlugin
         );
         $this->bonuses_controller = new BonusesController(
             new BonusesService($service),
-            new CartView()
+            new BonusProgresView(),
+            new ActivatedBonusesView()
         );
     }
 
@@ -89,7 +92,16 @@ class BonusSystemPlugin
         add_action("woocommerce_cart_loaded_from_session", [$this->bonuses_controller, 'apply'], 10, 1);
         add_filter("the_content", [$this, 'override_cart'], 999);
         add_action('wp_enqueue_scripts', [$this, 'force_reload']);
+        add_action('wp_enqueue_scripts', [$this, 'cart_styles']);
         add_action('woocommerce_checkout_order_processed', [$this->bonuses_controller, 'save_bonuses'], 10, 2);
+    }
+
+    public function cart_styles(): void
+    {
+        if (!is_cart()) {
+            return;
+        }
+        wp_enqueue_style('cart-styles', plugin_dir_url(__FILE__) . "assets/css/cart.css");
     }
 
     public function force_reload(): void
@@ -114,6 +126,7 @@ class BonusSystemPlugin
                 return $this->bonuses_controller->cart_page() . $content;
             }
         } catch (\Throwable $ex) {
+            echo $ex->getMessage();
         }
         return $content;
     }

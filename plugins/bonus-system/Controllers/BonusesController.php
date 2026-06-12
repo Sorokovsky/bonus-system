@@ -3,17 +3,23 @@
 namespace BonusSystem\Controllers;
 
 use BonusSystem\Services\BonusesService;
-use BonusSystem\Views\Client\CartView;
+use BonusSystem\Views\Client\ActivatedBonusesView;
+use BonusSystem\Views\Client\BonusProgresView;
 
 class BonusesController
 {
     private BonusesService $service;
-    private CartView $view;
+    private BonusProgresView $progres_view;
+    private ActivatedBonusesView $activated_bonuses_view;
 
-    public function __construct(BonusesService $service, CartView $view)
-    {
+    public function __construct(
+        BonusesService $service,
+        BonusProgresView $progres_view,
+        ActivatedBonusesView $activated_bonuses_view
+    ) {
         $this->service = $service;
-        $this->view = $view;
+        $this->progres_view = $progres_view;
+        $this->activated_bonuses_view = $activated_bonuses_view;
     }
 
     public function apply(): void
@@ -23,7 +29,11 @@ class BonusesController
 
     public function cart_page(): string
     {
-        return $this->view->render($this->service->get_all(), $this->service->get_activated_bonuses());
+        return $this->progres_view->render(
+            $this->service->get_next_bonus(),
+            $this->service->get_difference(),
+            $this->service->get_percent()
+        ) . $this->activated_bonuses_view->render($this->service->get_activated_bonuses());
     }
 
     public function save_bonuses(int $order_id, $order): void

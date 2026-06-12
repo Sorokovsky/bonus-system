@@ -21,6 +21,7 @@ use BonusSystem\Services\BonusesService;
 use BonusSystem\Services\CartSaleService;
 use BonusSystem\Services\SettingsService;
 use BonusSystem\Views\Client\ActivatedBonusesView;
+use BonusSystem\Views\Client\BonusesMarqueueView;
 use BonusSystem\Views\Client\BonusProgresView;
 use BonusSystem\Views\Editor\SettingView;
 
@@ -80,7 +81,8 @@ class BonusSystemPlugin
         $this->bonuses_controller = new BonusesController(
             new BonusesService($service, new CartSaleService()),
             new BonusProgresView(),
-            new ActivatedBonusesView()
+            new ActivatedBonusesView(),
+            new BonusesMarqueueView()
         );
     }
 
@@ -94,6 +96,12 @@ class BonusSystemPlugin
         add_action('wp_enqueue_scripts', [$this, 'force_reload']);
         add_action('wp_enqueue_scripts', [$this, 'cart_styles']);
         add_action('woocommerce_checkout_order_processed', [$this->bonuses_controller, 'save_bonuses'], 10, 2);
+        add_action('wp_body_open', [$this, 'marqueue']);
+    }
+
+    public function marqueue(): void
+    {
+        echo $this->bonuses_controller->bonuses_marqueue();
     }
 
     public function cart_styles(): void
@@ -102,6 +110,14 @@ class BonusSystemPlugin
             return;
         }
         wp_enqueue_style('cart-styles', plugin_dir_url(__FILE__) . "assets/css/cart.css");
+        wp_enqueue_style('marqueue-styles', plugin_dir_url(__FILE__) . "assets/css/marqueue.css");
+        wp_enqueue_script(
+            'marqueue',
+            plugin_dir_url(__FILE__) . "assets/js/marqueue.js",
+            ['jquery'],
+            '1.0.0',
+            true
+        );
     }
 
     public function force_reload(): void
@@ -119,14 +135,10 @@ class BonusSystemPlugin
 
     public function override_cart(string $content): string
     {
-        try {
-            if (is_cart()) {
-                WC()->cart->calculate_totals();
-                do_action('woocommerce_cart_calculate_fees', WC()->cart);
-                return $this->bonuses_controller->cart_page() . $content;
-            }
-        } catch (\Throwable $ex) {
-            echo $ex->getMessage();
+        if (is_cart()) {
+            WC()->cart->calculate_totals();
+            do_action('woocommerce_cart_calculate_fees', WC()->cart);
+            return $this->bonuses_controller->cart_page() . $content;
         }
         return $content;
     }

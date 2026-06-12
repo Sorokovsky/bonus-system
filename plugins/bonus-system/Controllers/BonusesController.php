@@ -4,6 +4,7 @@ namespace BonusSystem\Controllers;
 
 use BonusSystem\Services\BonusesService;
 use BonusSystem\Views\Client\ActivatedBonusesView;
+use BonusSystem\Views\Client\BonusesMarqueueView;
 use BonusSystem\Views\Client\BonusProgresView;
 
 class BonusesController
@@ -12,15 +13,18 @@ class BonusesController
 
     private BonusProgresView $progres_view;
     private ActivatedBonusesView $activated_bonuses_view;
+    private BonusesMarqueueView $bonuses_marqueue_view;
 
     public function __construct(
         BonusesService $service,
         BonusProgresView $progres_view,
-        ActivatedBonusesView $activated_bonuses_view
+        ActivatedBonusesView $activated_bonuses_view,
+        BonusesMarqueueView $bonuses_marqueue_view
     ) {
         $this->service = $service;
         $this->progres_view = $progres_view;
         $this->activated_bonuses_view = $activated_bonuses_view;
+        $this->bonuses_marqueue_view = $bonuses_marqueue_view;
     }
 
     public function apply(): void
@@ -53,5 +57,10 @@ class BonusesController
         }
 
         update_post_meta($order_id, '_applied_bonuses', implode("; ", $bonuses_data));
+    }
+
+    public function bonuses_marqueue(): string
+    {
+        return $this->bonuses_marqueue_view->render($this->service->get_all());
     }
 }

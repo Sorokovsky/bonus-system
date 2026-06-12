@@ -9,6 +9,7 @@ use BonusSystem\Views\Client\BonusProgresView;
 class BonusesController
 {
     private BonusesService $service;
+
     private BonusProgresView $progres_view;
     private ActivatedBonusesView $activated_bonuses_view;
 
@@ -24,7 +25,9 @@ class BonusesController
 
     public function apply(): void
     {
-        $this->service->apply();
+        if (!$this->service->has_sale_product()) {
+            $this->service->apply();
+        }
     }
 
     public function cart_page(): string
@@ -32,7 +35,8 @@ class BonusesController
         return $this->progres_view->render(
             $this->service->get_next_bonus(),
             $this->service->get_difference(),
-            $this->service->get_percent()
+            $this->service->get_percent(),
+            $this->service->has_sale_product()
         ) . $this->activated_bonuses_view->render($this->service->get_activated_bonuses());
     }
 

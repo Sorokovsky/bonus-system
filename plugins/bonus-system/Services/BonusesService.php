@@ -3,21 +3,20 @@
 namespace BonusSystem\Services;
 
 use BonusSystem\Models\Bonus;
-use BonusSystem\Models\SalesBonus;
-use BonusSystem\Models\TextBonus;
-
 class BonusesService
 {
     private SettingsService $settings_service;
+    private CartSaleService $sale_service;
 
     /**
      * @var array<Bonus>
      */
     private array $bonuses;
 
-    public function __construct(SettingsService $settings_service)
+    public function __construct(SettingsService $settings_service, CartSaleService $cart_sale_service)
     {
         $this->settings_service = $settings_service;
+        $this->sale_service = $cart_sale_service;
         $settings = $this->settings_service->get_settings();
         $all_bonuses = array_merge($settings->get_sales(), $settings->get_texts());
         usort($all_bonuses, fn($a, $b) => $a->get_min_price() <=> $b->get_min_price());
@@ -32,7 +31,7 @@ class BonusesService
     {
         $result = [];
         foreach ($this->bonuses as $bonus) {
-            if ($bonus->is_activated()) {
+            if ($bonus->can_activate()) {
                 $result[] = $bonus;
             }
         }
@@ -52,7 +51,7 @@ class BonusesService
     {
         $next = null;
         foreach ($this->bonuses as $bonus) {
-            if (!$bonus->is_activated()) {
+            if (!$bonus->can_activate()) {
                 $next = $bonus;
                 break;
             }
@@ -87,5 +86,10 @@ class BonusesService
                 $bonus->activate();
             }
         }
+    }
+
+    public function has_sale_product(): bool
+    {
+        return $this->sale_service->has_sale_product();
     }
 }

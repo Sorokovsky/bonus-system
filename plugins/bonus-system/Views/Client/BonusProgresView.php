@@ -11,7 +11,7 @@ class BonusProgresView
      * @param float $difference
      * @return string
      */
-    public function render(?Bonus $next_bonus, float $difference, float $percent): string
+    public function render(?Bonus $next_bonus, float $difference, float $percent, bool $has_sale): string
     {
         $next_text = 'Вітаємо! Ви досягнули усіх можливих бонусів';
         if ($next_bonus !== null) {
@@ -26,6 +26,11 @@ class BonusProgresView
                 <span class='range-body' style='width: {$percent}%'></span>
             </div>
 HTML;
+        if ($has_sale) {
+            $html .= <<<HTML
+            <p>Бонуси не розповсюджуються на акційні товари</p>
+            HTML;
+        }
         return $html;
     }
 }

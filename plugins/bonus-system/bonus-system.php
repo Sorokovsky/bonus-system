@@ -18,10 +18,10 @@ use BonusSystem\Parsers\ApplyingBestParser;
 use BonusSystem\Parsers\SalesBonusParser;
 use BonusSystem\Parsers\TextsParser;
 use BonusSystem\Services\BonusesService;
+use BonusSystem\Services\CartSaleService;
 use BonusSystem\Services\SettingsService;
 use BonusSystem\Views\Client\ActivatedBonusesView;
 use BonusSystem\Views\Client\BonusProgresView;
-use BonusSystem\Views\Client\CartView;
 use BonusSystem\Views\Editor\SettingView;
 
 if (!defined("ABSPATH")) {
@@ -78,7 +78,7 @@ class BonusSystemPlugin
             new SettingView()
         );
         $this->bonuses_controller = new BonusesController(
-            new BonusesService($service),
+            new BonusesService($service, new CartSaleService()),
             new BonusProgresView(),
             new ActivatedBonusesView()
         );

@@ -3,6 +3,7 @@
 namespace BonusSystem\Services;
 
 use BonusSystem\Models\Bonus;
+use BonusSystem\Models\SalesBonus;
 class BonusesService
 {
     private SettingsService $settings_service;
@@ -50,11 +51,12 @@ class BonusesService
     public function get_next_bonus(): Bonus|null
     {
         $next = null;
-        foreach ($this->bonuses as $bonus) {
-            if (!$bonus->is_activated()) {
-                $next = $bonus;
+        for ($i = count($this->bonuses) - 1; $i > 0; $i--) {
+            $bonus = $this->bonuses[$i];
+            if ($bonus->is_activated()) {
                 break;
             }
+            $next = $bonus;
         }
         return $next;
     }
@@ -82,10 +84,19 @@ class BonusesService
     public function apply(): void
     {
         $subtotal = $this->sale_service->get_total_price();
+        $best_sale = null;
         foreach ($this->bonuses as $bonus) {
             if ($bonus->can_activate($subtotal)) {
+                $is_sale = $bonus instanceof SalesBonus;
+                if ($is_sale) {
+                    $best_sale = $bonus;
+                    continue;
+                }
                 $bonus->activate();
             }
+        }
+        if ($best_sale) {
+            $best_sale->activate();
         }
     }
 

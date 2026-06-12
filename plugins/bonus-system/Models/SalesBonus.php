@@ -51,7 +51,7 @@ class SalesBonus implements Bonus
 
     public function can_activate(float $subtotal): bool
     {
-        return $subtotal >= $this->min_price;
+        return round($subtotal) >= round($this->min_price);
     }
 
     public function activate(): void

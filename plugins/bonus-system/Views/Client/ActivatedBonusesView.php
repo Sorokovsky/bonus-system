@@ -12,10 +12,14 @@ class ActivatedBonusesView
      */
     public function render(array $bonuses): string
     {
+        $title = 'Застосовані бонуси';
+        if (count($bonuses) === 0) {
+            $title = 'Не має застосованих бонусів';
+        }
         $html = '';
         $html .= <<<HTML
         <div class="bonuses">
-            <h3>Застосовані бонуси</h3>
+            <h3>{$title}</h3>
             <ul>
         HTML;
         foreach ($bonuses as $bonus) {

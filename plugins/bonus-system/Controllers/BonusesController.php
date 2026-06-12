@@ -25,9 +25,7 @@ class BonusesController
 
     public function apply(): void
     {
-        if (!$this->service->has_sale_product()) {
-            $this->service->apply();
-        }
+        $this->service->apply();
     }
 
     public function cart_page(): string

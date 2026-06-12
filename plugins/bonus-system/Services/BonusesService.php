@@ -31,7 +31,7 @@ class BonusesService
     {
         $result = [];
         foreach ($this->bonuses as $bonus) {
-            if ($bonus->can_activate()) {
+            if ($bonus->is_activated()) {
                 $result[] = $bonus;
             }
         }
@@ -51,7 +51,7 @@ class BonusesService
     {
         $next = null;
         foreach ($this->bonuses as $bonus) {
-            if (!$bonus->can_activate()) {
+            if (!$bonus->is_activated()) {
                 $next = $bonus;
                 break;
             }
@@ -61,7 +61,7 @@ class BonusesService
 
     public function get_difference(): float
     {
-        $subtotal = WC()->cart->get_subtotal();
+        $subtotal = $this->sale_service->get_total_price();
         $next = $this->get_next_bonus();
         if ($next === null) {
             return 0;
@@ -75,14 +75,15 @@ class BonusesService
         if ($bonus === null) {
             return 100;
         }
-        $subtotal = WC()->cart->get_subtotal();
+        $subtotal = $this->sale_service->get_total_price();
         return min(($subtotal * 100) / $bonus->get_min_price(), 100);
     }
 
     public function apply(): void
     {
+        $subtotal = $this->sale_service->get_total_price();
         foreach ($this->bonuses as $bonus) {
-            if ($bonus->can_activate()) {
+            if ($bonus->can_activate($subtotal)) {
                 $bonus->activate();
             }
         }

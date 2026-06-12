@@ -49,12 +49,9 @@ class SalesBonus implements Bonus
         return $this->discount_type;
     }
 
-    public function can_activate(): bool
+    public function can_activate(float $subtotal): bool
     {
-        if (!function_exists("WC") || !isset(WC()->cart)) {
-            return false;
-        }
-        return WC()->cart->get_subtotal() >= $this->min_price;
+        return $subtotal >= $this->min_price;
     }
 
     public function activate(): void

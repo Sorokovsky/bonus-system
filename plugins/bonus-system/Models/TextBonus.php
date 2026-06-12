@@ -42,11 +42,8 @@ class TextBonus implements Bonus
     }
 
     #[Override]
-    public function can_activate(): bool
+    public function can_activate(float $subtotal): bool
     {
-        if (!function_exists("WC") || WC()->cart === null) {
-            return false;
-        }
-        return WC()->cart->get_subtotal() >= $this->min_price;
+        return $subtotal >= $this->min_price;
     }
 }

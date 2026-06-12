@@ -15,7 +15,7 @@ class BonusProgresView
     {
         $next_text = 'Вітаємо! Ви досягнули усіх можливих бонусів';
         if ($next_bonus !== null) {
-            $next_text = 'Щоб скористатися бонусом "' . $next_bonus->get_name() . '" доберіть товарів ще на ' . $difference . ' грн';
+            $next_text = 'Щоб скористатися бонусом "' . $next_bonus->get_name() . '" придбайте товарів ще на ' . $difference . ' грн';
         }
         $html = '';
         $html .= <<<HTML

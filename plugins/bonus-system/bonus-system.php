@@ -106,10 +106,6 @@ class BonusSystemPlugin
 
     public function cart_styles(): void
     {
-        if (!is_cart()) {
-            return;
-        }
-        wp_enqueue_style('cart-styles', plugin_dir_url(__FILE__) . "assets/css/cart.css");
         wp_enqueue_style('marqueue-styles', plugin_dir_url(__FILE__) . "assets/css/marqueue.css");
         wp_enqueue_script(
             'marqueue',
@@ -118,6 +114,10 @@ class BonusSystemPlugin
             '1.0.0',
             true
         );
+        if (!is_cart()) {
+            return;
+        }
+        wp_enqueue_style('cart-styles', plugin_dir_url(__FILE__) . "assets/css/cart.css");
     }
 
     public function force_reload(): void

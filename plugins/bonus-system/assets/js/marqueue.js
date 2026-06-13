@@ -17,7 +17,7 @@
     function next() {
         deactivate(currentIndex);
         const newIndex = (currentIndex + 1) % bonuses.length;
-        activate(newIndex);
+        setTimeout(() => activate(newIndex), 300);
     }
 
     function prev() {
@@ -26,7 +26,7 @@
         while (newIndex < 0) {
             newIndex += (newIndex + bonuses.length) % bonuses.length;
         }
-        activate(newIndex);
+        setTimeout(() => activate(newIndex), 300);
     }
 
     function activate(index) {

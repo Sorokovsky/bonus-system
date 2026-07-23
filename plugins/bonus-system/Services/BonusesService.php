@@ -21,7 +21,7 @@ class BonusesService
         $settings = $this->settings_service->get_settings();
         $all_bonuses = array_merge($settings->get_sales(), $settings->get_texts());
         usort($all_bonuses, fn($a, $b) => $a->get_min_price() <=> $b->get_min_price());
-        usort($all_bonuses, fn($a, $b) => $a->get_min_products_count <=> $b->get_min_products_count());
+        usort($all_bonuses, fn($a, $b) => $a->get_min_products_count() <=> $b->get_min_products_count());
         $this->bonuses = $all_bonuses;
     }
 

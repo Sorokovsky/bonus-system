@@ -19,8 +19,9 @@ class BonusesMarqueueView
                 <ul>
         HTML;
         foreach ($bonuses as $bonus) {
+            $text = $bonus->get_name() . ' від ' . $bonus->get_min_price() . ' грн';
             $html .= <<<HTML
-                    <li>{$bonus->get_name()}</li>
+                    <li>{$text}</li>
                     HTML;
         }
         $html .= <<<HTML

@@ -17,6 +17,10 @@ class TextEditorView
             <input type="text" name="<?php echo SettingsService::OPTION_NAME; ?>[texts][<?php echo $index; ?>][name]"
                 value="<?php echo esc_attr($text_bonus->get_name()); ?>" class="regular-text"
                 placeholder="<?php _e("Текст бонусу", 'bonus-system'); ?>" style="width: 200px;">
+            <input type="number"
+                name="<?php echo SettingsService::OPTION_NAME; ?>[texts][<?php echo $index; ?>][min_products_count]"
+                placeholder="<?php _e('Мінімальна кількість товарів', 'bonus-system'); ?>" class="regular-text" step="any"
+                value="<?php echo $text_bonus->get_min_products_count(); ?>" style="width: 120px;">
             <button type="button" class="button remove-tier remove-text">
                 <?php _e("Видалити", 'bonus-system'); ?>
             </button>

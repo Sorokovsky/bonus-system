@@ -21,6 +21,7 @@ class BonusesService
         $settings = $this->settings_service->get_settings();
         $all_bonuses = array_merge($settings->get_sales(), $settings->get_texts());
         usort($all_bonuses, fn($a, $b) => $a->get_min_price() <=> $b->get_min_price());
+        usort($all_bonuses, fn($a, $b) => $a->get_min_products_count <=> $b->get_min_products_count());
         $this->bonuses = $all_bonuses;
     }
 
@@ -51,7 +52,7 @@ class BonusesService
     public function get_next_bonus(): Bonus|null
     {
         $next = null;
-        for ($i = count($this->bonuses) - 1; $i > 0; $i--) {
+        for ($i = count($this->bonuses) - 1; $i >= 0; $i--) {
             $bonus = $this->bonuses[$i];
             if ($bonus->is_activated()) {
                 break;
@@ -81,12 +82,23 @@ class BonusesService
         return min(($subtotal * 100) / $bonus->get_min_price(), 100);
     }
 
+    public function get_products_count(): int
+    {
+        $count = 0;
+        $cart = WC()->cart->get_cart();
+        foreach ($cart as $product) {
+            $count += $product['quantity'];
+        }
+        return $count;
+    }
+
     public function apply(): void
     {
         $subtotal = $this->sale_service->get_total_price();
         $best_sale = null;
+
         foreach ($this->bonuses as $bonus) {
-            if ($bonus->can_activate($subtotal)) {
+            if ($bonus->can_activate($subtotal, $this->get_products_count())) {
                 $is_sale = $bonus instanceof SalesBonus;
                 if ($is_sale) {
                     $best_sale = $bonus;

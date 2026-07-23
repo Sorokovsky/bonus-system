@@ -23,9 +23,14 @@ class SaleEditorView
                     ₴ <?php _e("Фіксована", "bonus-system"); ?>
                 </option>
             </select>
-            <input type="number" name="<?php echo SettingsService::OPTION_NAME; ?>[sales][<?php echo $index; ?>][discount_value]"
+            <input type="number"
+                name="<?php echo SettingsService::OPTION_NAME; ?>[sales][<?php echo $index; ?>][discount_value]"
                 value="<?php echo $sale->get_discount_amount(); ?>" class="discount-value" step="any" min="0"
                 style="width: 120px;">
+            <input type="number"
+                name="<?php echo SettingsService::OPTION_NAME; ?>[sales][<?php echo $index; ?>][min_products_count]"
+                placeholder="<?php _e('Мінімальна кількість товарів', 'bonus-system'); ?>" class="regular-text" step="any"
+                value="<?php echo $sale->get_min_products_count(); ?>" style="width: 120px;">
             <button type="button" class="button remove-tier remove-sales">
                 <?php _e("Видалити", 'bonus-system'); ?>
             </button>

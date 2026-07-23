@@ -57,6 +57,12 @@ class SettingsScriptsView
                                    class="discount-value"
                                    step="any"
                                    style="width: 120px;">
+                            <input type="number"
+                                   name="${optionName}[sales][${rowId}][min_products_count]"
+                                   placeholder="<?php _e('Мінімальні кількість товарів', 'bonus-system'); ?>"
+                                   class="regular-text"
+                                   step="any"
+                                   style="width: 120px;">
                             <button type="button" class="button remove-tier remove-sales">
                                 <?php _e('Видалити', 'bonus-system'); ?>
                             </button>
@@ -118,6 +124,12 @@ class SettingsScriptsView
                                    placeholder="<?php _e('Текст бонусу', 'bonus-system'); ?>"
                                    class="regular-text"
                                    style="width: 200px;">
+                            <input type="number"
+                                   name="${optionName}[texts][${rowId}][min_products_count]"
+                                   placeholder="<?php _e('Мінімальні кількість товарів', 'bonus-system'); ?>"
+                                   class="regular-text"
+                                   step="any"
+                                   style="width: 120px;">
                             <button type="button" class="button remove-tier remove-text">
                                 <?php _e('Видалити', 'bonus-system'); ?>
                             </button>

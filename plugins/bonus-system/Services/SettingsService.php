@@ -45,6 +45,7 @@ class SettingsService
                 $sanitized['sales'][$index]['min_price'] = floatval($sale['min_price'] ?? 0);
                 $sanitized['sales'][$index]['discount_type'] = sanitize_text_field($sale['discount_type'] ?? 'percent');
                 $sanitized['sales'][$index]['discount_value'] = floatval($sale['discount_value'] ?? 0);
+                $sanitized['sales'][$index]['min_products_count'] = intval($sale['min_products_count'] ?? 0);
             }
         }
 
@@ -52,6 +53,8 @@ class SettingsService
             foreach ($input['texts'] as $index => $text_bonus) {
                 $sanitized['texts'][$index]['min_price'] = floatval($text_bonus['min_price']);
                 $sanitized['texts'][$index]['name'] = sanitize_text_field($text_bonus['name']);
+                $sanitized['texts'][$index]['name'] = sanitize_text_field($text_bonus['name']);
+                $sanitized['texts'][$index]['min_products_count'] = intval($text_bonus['min_products_count']);
             }
         }
 

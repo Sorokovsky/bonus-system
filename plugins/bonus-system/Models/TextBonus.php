@@ -8,13 +8,15 @@ class TextBonus implements Bonus
     private string $name;
 
     private float $min_price;
+    private int $min_products_count;
     private bool $activated;
 
-    public function __construct(string $name, float $min_price)
+    public function __construct(string $name, float $min_price, int $min_products_count)
     {
         $this->name = $name;
         $this->min_price = $min_price;
         $this->activated = false;
+        $this->min_products_count = $min_products_count;
     }
 
     #[Override]
@@ -42,8 +44,14 @@ class TextBonus implements Bonus
     }
 
     #[Override]
-    public function can_activate(float $subtotal): bool
+    public function get_min_products_count(): int
     {
-        return $subtotal >= $this->min_price;
+        return $this->min_products_count;
+    }
+
+    #[Override]
+    public function can_activate(float $subtotal, int $products_count): bool
+    {
+        return $subtotal >= $this->min_price && $products_count >= $this->min_products_count;
     }
 }

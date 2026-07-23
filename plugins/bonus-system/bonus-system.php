@@ -2,7 +2,7 @@
 /*
 Plugin Name: Система бонусів
 Description: Система бонусів для інтернет магазинів.
-Version: 0.0.1
+Version: 0.0.2
 Requires at least: 5.8
 Requires PHP: 7.2
 Requires Plugins: woocommerce
@@ -95,8 +95,25 @@ class BonusSystemPlugin
         add_filter("the_content", [$this, 'override_cart'], 999);
         add_action('wp_enqueue_scripts', [$this, 'force_reload']);
         add_action('wp_enqueue_scripts', [$this, 'cart_styles']);
-        add_action('woocommerce_checkout_order_processed', [$this->bonuses_controller, 'save_bonuses'], 10, 2);
+        add_action('woocommerce_new_order', [$this->bonuses_controller, 'save_bonuses'], 10, 1);
         add_action('wp_body_open', [$this, 'marqueue']);
+        add_action('woocommerce_admin_order_data_after_billing_address', [$this->bonuses_controller, 'show_bonuses'], 10, 1);
+        add_filter('woocommerce_webhook_payload', function ($payload, $resource, $id) {
+            if ($resource === 'order') {
+                $order = wc_get_order($id);
+                if ($order) {
+                    $bonuses = $order->get_meta('applied_bonuses', true);
+                    $discount = $order->get_meta('applied_discount', true);
+                    if ($bonuses) {
+                        // Додаємо на верхній рівень
+                        $payload['applied_bonuses'] = $bonuses;
+                    }
+
+                    $payload['discount_total'] = (int) round((float) ($discount ?: 0));
+                }
+            }
+            return $payload;
+        }, 10, 3);
     }
 
     public function marqueue(): void
@@ -106,7 +123,7 @@ class BonusSystemPlugin
 
     public function cart_styles(): void
     {
-        wp_enqueue_style('marqueue-styles', plugin_dir_url(__FILE__) . "assets/css/marqueue.css");
+        wp_enqueue_style('marqueue-styles', plugin_dir_url(__FILE__) . "assets/css/marqueue-bonuses.css");
         wp_enqueue_script(
             'marqueue',
             plugin_dir_url(__FILE__) . "assets/js/marqueue.js",
@@ -114,7 +131,7 @@ class BonusSystemPlugin
             '1.0.0',
             true
         );
-        if (!is_cart()) {
+        if (!is_cart() && !is_checkout()) {
             return;
         }
         wp_enqueue_style('cart-styles', plugin_dir_url(__FILE__) . "assets/css/cart.css");
@@ -135,7 +152,7 @@ class BonusSystemPlugin
 
     public function override_cart(string $content): string
     {
-        if (is_cart()) {
+        if (is_cart() || is_checkout()) {
             WC()->cart->calculate_totals();
             do_action('woocommerce_cart_calculate_fees', WC()->cart);
             return $this->bonuses_controller->cart_page() . $content;

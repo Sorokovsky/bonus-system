@@ -28,7 +28,11 @@ class TextsParser implements Parser
         foreach ($texts_raw as $text_raw) {
             $min_price = (float) ($text_raw['min_price'] ?? 0);
             $name = $text_raw['name'] ?? '';
-            $result[] = new TextBonus($name, $min_price);
+            $min_products_count = (int) ($text_raw['min_products_count']) ?? 0;
+            if ($min_products_count < 0) {
+                $min_products_count = 0;
+            }
+            $result[] = new TextBonus($name, $min_price, $min_products_count);
         }
         return $result;
     }

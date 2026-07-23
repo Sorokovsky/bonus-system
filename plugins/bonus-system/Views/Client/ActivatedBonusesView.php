@@ -10,16 +10,24 @@ class ActivatedBonusesView
      * @param array<Bonus> $bonuses
      * @return string
      */
-    public function render(array $bonuses): string
+    public function render(array $bonuses, int $products_count, ?Bonus $next_bonus): string
     {
         $title = 'Застосовані бонуси';
         if (count($bonuses) === 0) {
             $title = 'Не має застосованих бонусів';
         }
+
         $html = '';
         $html .= <<<HTML
         <div class="bonuses">
             <h3>{$title}</h3>
+        HTML;
+        if ($next_bonus != null) {
+            $html .= <<<HTML
+            <p>{$products_count}/{$next_bonus->get_min_products_count()} товарів до наступного бонусу</p>
+        HTML;
+        }
+        $html .= <<<HTML
             <ul>
         HTML;
         foreach ($bonuses as $bonus) {

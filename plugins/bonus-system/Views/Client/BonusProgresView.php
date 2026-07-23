@@ -15,7 +15,11 @@ class BonusProgresView
     {
         $next_text = 'Вітаємо! Ви досягнули усіх можливих бонусів';
         if ($next_bonus !== null) {
-            $next_text = 'Щоб скористатися бонусом "' . $next_bonus->get_name() . '" придбайте товарів ще на ' . $difference . ' грн';
+            if ($difference > 0) {
+                $next_text = 'Щоб скористатися бонусом "' . $next_bonus->get_name() . '" придбайте товарів ще на ' . $difference . ' грн';
+            } else {
+                $next_text = 'Щоб скористатися бонусом "' . $next_bonus->get_name() . '" у корзині має бути кількість товарів не меньше ніж ' . $next_bonus->get_min_products_count();
+            }
         }
         $html = '';
         $html .= <<<HTML

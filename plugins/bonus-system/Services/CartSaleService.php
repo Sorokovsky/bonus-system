@@ -26,7 +26,7 @@ class CartSaleService
         foreach (WC()->cart->get_cart() as $order) {
             $product = $order['data'];
             if ($this->is_sale_product($product)) {
-                $subtotal -= $product->get_price() * $product->get_total_sales();
+                $subtotal -= (float)$order['line_total'];
             }
         }
         return $subtotal;
